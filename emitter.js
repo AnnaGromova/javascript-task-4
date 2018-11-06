@@ -13,32 +13,32 @@ const isStar = false;
 function getEmitter() {
     let events = {};
 
-    function addNotification(event, subevent, context, handler) {
-        if (!events[event + subevent]) {
-            events[event + subevent] = [];
+    function addNotification(event, context, handler) {
+        if (!events[event]) {
+            events[event] = [];
         }
-        events[event + subevent].push({ context, handler });
+        events[event].push({ context, handler });
     }
 
-    function deleteNotification(event, subevent, context) {
+    function deleteNotification(event, context) {
         Object.keys(events).filter(key =>
-            key === event + subevent || subevent === '' && key.split('.')[0] === event)
+            key === event || event.startsWith(event + '.'))
             .forEach(key => {
                 events[key] = events[key]
                     .filter(subscriber => subscriber.context !== context);
             });
     }
 
-    function emitNotification(event, subevent) {
-        if (events[event + subevent] && subevent !== '') {
-            events[event + subevent].forEach(subscriber => {
-                subscriber.handler.call(subscriber.context);
-            });
-        }
+    function emitNotification(event) {
         if (events[event]) {
             events[event].forEach(subscriber => {
                 subscriber.handler.call(subscriber.context);
             });
+        }
+        let subevent = event.slice(event.lastIndexOf('.'));
+        event = event.slice(0, event.lastIndexOf('.'));
+        if (subevent !== '') {
+            emitNotification(event);
         }
     }
 
@@ -52,13 +52,7 @@ function getEmitter() {
          * @returns {Any}
          */
         on: function (event, context, handler) {
-            let eventAndSubevent = event.split('.');
-            if (eventAndSubevent[1]) {
-                eventAndSubevent[1] = '.' + eventAndSubevent;
-            } else {
-                eventAndSubevent[1] = '';
-            }
-            addNotification(eventAndSubevent[0], eventAndSubevent[1], context, handler);
+            addNotification(event, context, handler);
 
             return this;
         },
@@ -70,13 +64,7 @@ function getEmitter() {
          * @returns {Any}
          */
         off: function (event, context) {
-            let eventAndSubevent = event.split('.');
-            if (eventAndSubevent[1]) {
-                eventAndSubevent[1] = '.' + eventAndSubevent;
-            } else {
-                eventAndSubevent[1] = '';
-            }
-            deleteNotification(eventAndSubevent[0], eventAndSubevent[1], context);
+            deleteNotification(event, context);
 
             return this;
         },
@@ -87,13 +75,7 @@ function getEmitter() {
          * @returns {Any}
          */
         emit: function (event) {
-            let eventAndSubevent = event.split('.');
-            if (eventAndSubevent[1]) {
-                eventAndSubevent[1] = '.' + eventAndSubevent;
-            } else {
-                eventAndSubevent[1] = '';
-            }
-            emitNotification(eventAndSubevent[0], eventAndSubevent[1]);
+            emitNotification(event);
 
             return this;
         },
