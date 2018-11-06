@@ -22,7 +22,7 @@ function getEmitter() {
 
     function deleteNotification(event, context) {
         Object.keys(events).filter(key =>
-            key === event || event.startsWith(event + '.'))
+            key === event || key.startsWith(event + '.'))
             .forEach(key => {
                 events[key] = events[key]
                     .filter(subscriber => subscriber.context !== context);
