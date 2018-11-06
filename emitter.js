@@ -4,7 +4,7 @@
  * Сделано задание на звездочку
  * Реализованы методы several и through
  */
-const isStar = false;
+const isStar = true;
 
 /**
  * Возвращает новый emitter
@@ -13,11 +13,13 @@ const isStar = false;
 function getEmitter() {
     let events = {};
 
-    function addNotification(event, context, handler) {
+    function addNotification(event, context, handler,
+        timesAndFrequency = { times: Infinity, frequency: 1 }) {
         if (!events[event]) {
             events[event] = [];
         }
-        events[event].push({ context, handler });
+        events[event].push({ context, handler, times: timesAndFrequency.times,
+            frequency: timesAndFrequency.frequency, count: 0 });
     }
 
     function deleteNotification(event, context) {
@@ -32,7 +34,11 @@ function getEmitter() {
     function emitNotification(event) {
         if (events[event]) {
             events[event].forEach(subscriber => {
-                subscriber.handler.call(subscriber.context);
+                if (subscriber.times && subscriber.count % subscriber.frequency === 0) {
+                    subscriber.handler.call(subscriber.context);
+                    subscriber.times--;
+                }
+                subscriber.count++;
             });
         }
         let lastIndexOfPoint = event.lastIndexOf('.');
@@ -86,9 +92,12 @@ function getEmitter() {
          * @param {Object} context
          * @param {Function} handler
          * @param {Number} times – сколько раз получить уведомление
+         * @returns {Any}
          */
         several: function (event, context, handler, times) {
-            console.info(event, context, handler, times);
+            addNotification(event, context, handler, { times: times, frequency: 1 });
+
+            return this;
         },
 
         /**
@@ -98,9 +107,12 @@ function getEmitter() {
          * @param {Object} context
          * @param {Function} handler
          * @param {Number} frequency – как часто уведомлять
+         * @returns {Any}
          */
         through: function (event, context, handler, frequency) {
-            console.info(event, context, handler, frequency);
+            addNotification(event, context, handler, { times: Infinity, frequency: frequency });
+
+            return this;
         }
     };
 }
