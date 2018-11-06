@@ -35,10 +35,9 @@ function getEmitter() {
                 subscriber.handler.call(subscriber.context);
             });
         }
-        let subevent = event.slice(event.lastIndexOf('.'));
-        event = event.slice(0, event.lastIndexOf('.'));
-        if (subevent !== '') {
-            emitNotification(event);
+        let lastIndexOfPoint = event.lastIndexOf('.');
+        if (lastIndexOfPoint !== -1) {
+            emitNotification(event.slice(0, lastIndexOfPoint));
         }
     }
 
