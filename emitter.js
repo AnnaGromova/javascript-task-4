@@ -13,18 +13,27 @@ const isStar = true;
 function getEmitter() {
     let events = {};
 
-    function addNotification(event, context, handler,
-        timesAndFrequency = { times: Infinity, frequency: 1 }) {
+    function addNotification(
+        event,
+        context,
+        handler,
+        timesAndFrequency = { times: Infinity, frequency: 1 }
+    ) {
         if (!events[event]) {
             events[event] = [];
         }
-        events[event].push({ context, handler, times: timesAndFrequency.times,
-            frequency: timesAndFrequency.frequency, count: 0 });
+        events[event].push({
+            context,
+            handler,
+            times: timesAndFrequency.times,
+            frequency: timesAndFrequency.frequency,
+            count: 0
+        });
     }
 
     function deleteNotification(event, context) {
-        Object.keys(events).filter(key =>
-            key === event || key.startsWith(event + '.'))
+        Object.keys(events)
+            .filter(key => key === event || key.startsWith(event + '.'))
             .forEach(key => {
                 events[key] = events[key]
                     .filter(subscriber => subscriber.context !== context);
@@ -95,7 +104,7 @@ function getEmitter() {
          * @returns {Any}
          */
         several: function (event, context, handler, times) {
-            addNotification(event, context, handler, { times: times, frequency: 1 });
+            addNotification(event, context, handler, { times, frequency: 1 });
 
             return this;
         },
@@ -110,7 +119,7 @@ function getEmitter() {
          * @returns {Any}
          */
         through: function (event, context, handler, frequency) {
-            addNotification(event, context, handler, { times: Infinity, frequency: frequency });
+            addNotification(event, context, handler, { times: Infinity, frequency });
 
             return this;
         }
